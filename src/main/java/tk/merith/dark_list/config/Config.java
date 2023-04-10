@@ -1,18 +1,9 @@
 package tk.merith.dark_list.config;
 
-import org.quiltmc.config.api.WrappedConfig;
-import org.quiltmc.config.api.annotations.Comment;
-import org.quiltmc.config.api.values.ValueMap;
+import eu.midnightdust.lib.config.MidnightConfig;
 
-import java.util.HashMap;
-
-public class Config extends WrappedConfig {
-
-	@Comment("Enable debug mode. Used for development (default: false)")
-	public final boolean debug = false;
-
-	@Comment("Force Client to have DarkList mod installed")
-	public final boolean enforceDarkList = false;
-	@Comment("The modlist to send to the server. (format: modid:version,modid:version,modid:version")
-	public final String modList = "example_mod:v1.0.0";
+public class Config extends MidnightConfig {
+		@Entry(name = "Debug") public static boolean debug = false;
+		@Entry(name = "Enforce DarkList") public static boolean enforceDarkList = true;
+		@Entry(name = "BanList") public static String modList = "examplemod:1.0.0,examplemod2:1.0.0";
 }

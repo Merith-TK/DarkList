@@ -1,5 +1,6 @@
 package tk.merith.dark_list;
 
+import eu.midnightdust.lib.config.MidnightConfig;
 import it.unimi.dsi.fastutil.Hash;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
@@ -46,10 +47,12 @@ public class DarkList implements ModInitializer {
 			});
 		} else {
 			// CONF: handle config shit
-			Config conf = QuiltConfig.create("DarkList", "config", Config.class);
+
+			MidnightConfig.init("DarkList", Config.class);
+
 			// CONF: break blacklist into hashmap
 			HashMap<String, String> blacklist = new HashMap<>();
-			String[] brokenList = conf.modList.split(",");
+			 String[] brokenList = Config.modList.split(",");
 			for (String item : brokenList) {
 				String[] itemSplit = item.split(":");
 				if (itemSplit.length < 2) {
@@ -60,8 +63,8 @@ public class DarkList implements ModInitializer {
 			};
 
 			// Print The config
-			LOGGER.warn(conf.toString());
-			
+
+
 			// handle packet info
 			ServerLoginConnectionEvents.QUERY_START.register((handler, server, sender, synchronizer) -> {
 				sender.sendPacket(packetId, PacketByteBufs.empty());
@@ -69,7 +72,7 @@ public class DarkList implements ModInitializer {
 			ServerLoginNetworking.registerGlobalReceiver(packetId, (server, handler, understood, buf, synchronizer, responseSender) -> {
 				if (!understood) {
 					LOGGER.warn("DarkList: User Connected without DarkList installed");
-					if (conf.enforceDarkList) {
+					if (Config.enforceDarkList) {
 						LOGGER.warn("DarkList: Kicking User");
 						handler.disconnect(Text.of("Sorry, you need DarkList installed to join this server"));
 					}
@@ -77,7 +80,7 @@ public class DarkList implements ModInitializer {
 				LOGGER.info("DarkList: Received modlist from client");
 				HashMap<String, String> clientModList = new HashMap<String, String>();
 				clientModList.putAll(buf.readMap(PacketByteBuf::readString, PacketByteBuf::readString));
-				if (conf.debug) {
+				if (Config.debug) {
 					LOGGER.info("DarkList: {}", clientModList);
 				};
 
@@ -86,13 +89,13 @@ public class DarkList implements ModInitializer {
 					String modid = entry.getKey();
 					String version = entry.getValue();
 					if (blacklist.containsKey(modid)) {
-						NotAllowedMods += modid + ":" + version + ",";
+						NotAllowedMods += modid + ":" + version + ", ";
 					}
 				}
 				if (NotAllowedMods.length() > 0) {
 					NotAllowedMods = NotAllowedMods.substring(0, NotAllowedMods.length() - 1);
-					LOGGER.info("DarkList: Player is not allowed to join the server. (Mods: {})", NotAllowedMods);
-					handler.disconnect(Text.of("You are not allowed to join the server. (Mods: " + NotAllowedMods + ")"));
+					LOGGER.info("DarkList: Attempted to join with the following Mods: {})", NotAllowedMods);
+					handler.disconnect(Text.of("You are not allowed to join the server with the following Mods: "+NotAllowedMods));
 				}
 			}
 			});
